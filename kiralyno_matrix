@@ -1,0 +1,77 @@
+class KiralynoMatrix:
+    def __init__(self, ke, c):
+        self.kezdo = ke
+        self.cel = c
+        # Az állapot most (Mátrix, s) formátumú.
+        # ke[0] maga a mátrix (tuple-ök tuple-je), aminek a hossza adja az N-t.
+        self.N = len(ke[0])
+
+    def celteszt(self, a): # a = (M, s)
+        # Az a[1] tárolja az s-t (következő sor indexét)
+        return a[1] == self.cel
+
+    def rakovetkezo(self, a):
+        gyerekek = []
+        M = a[0]     # A sakktáblát reprezentáló mátrix
+        s = a[1]     # A következő sor indexe (1-től indul)
+
+        # Ha már letettük az összes királynőt, nem tudunk tovább lépni
+        if s > self.N:
+            return gyerekek
+
+        for j in range(1, self.N + 1): # lerak_j: melyik oszlopba próbáljuk rakni?
+            elofeltetel = True # (s, j) helyre lerakható?
+            
+            for m in range(1, s): # Végignézzük a korábbi sorokat (minden m < s)
+                
+                # 1. LÉPÉS: Megkeressük, hogy az m. sorban melyik oszlopban (c) van a királynő
+                c = -1
+                for oszlop_index in range(self.N):
+                    # M[sor][oszlop]: mivel a Python 0-tól indexel, ezért m-1 kell
+                    if M[m - 1][oszlop_index] == 1:
+                        c = oszlop_index + 1 # Az oszlop indexét 1-től számoljuk a képlet miatt
+                        break
+                
+                # 2. LÉPÉS: Ellenőrizzük az ütéseket a megtalált 'c' oszloppal
+                if c != -1:
+                    if c != j and abs(m - s) != abs(c - j):
+                        elofeltetel = True
+                    else:
+                        elofeltetel = False
+                        break # Ütik egymást, felesleges a többi sort nézni
+            
+            if elofeltetel:
+                # Mivel az M egy tuple, listává alakítjuk, hogy módosíthassuk
+                uj_M = [list(sor) for sor in M]
+                
+                # Lerakjuk a királynőt az s. sor j. oszlopába (0-s indexálás miatt -1)
+                uj_M[s - 1][j - 1] = 1
+                
+                # Visszaalakítjuk tuple-ök tuple-jévé
+                uj_M_tuple = tuple(tuple(sor) for sor in uj_M)
+                
+                # Az új állapot: (új_mátrix, s + 1)
+                gyerekek.append((uj_M_tuple, s + 1))
+                 
+        return gyerekek
+
+if __name__ == '__main__':
+    # 4x4-es kezdőállapot: 4 darab 4 hosszú csupa 0 sor, és s=1
+    k_4x4 = (
+        (
+            (0, 0, 0, 0),
+            (0, 0, 0, 0),
+            (0, 0, 0, 0),
+            (0, 0, 0, 0)
+        ), 
+        1 # Ez az s
+    )
+    # A cél, hogy elérjük az 5. sort (N+1)
+    feladat_4x4 = KiralynoMatrix(k_4x4, 5)
+    
+    # 5x5-ös kezdőállapot példa
+    k_5x5 = (
+        ((0,0,0,0,0), (0,0,0,0,0), (0,0,0,0,0), (0,0,0,0,0), (0,0,0,0,0)), 
+        1
+    )
+    feladat_5x5 = KiralynoMatrix(k_5x5, 6)
